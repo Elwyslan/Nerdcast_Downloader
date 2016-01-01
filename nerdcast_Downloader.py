@@ -3,7 +3,7 @@ import urllib2 as url
 import re
 """
 Autor: José Elwyslan Mauricio de Oliveira
-Descricao: Programa para ajudar a aqueles apresadinhos que ficam dando F5 no site do Jovem Nerd.
+Descricao: Programa para ajudar a aqueles apressadinhos que ficam dando F5 no site do Jovem Nerd.
 		   Este programa:
 		   					- Acessa a página: "http://jovemnerd.com.br/nerdcast/"
 		   					- Extrai o link do ultimo podcast lancado
