@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import urllib2 as url
 import re
+import time
 """
 Autor: José Elwyslan Mauricio de Oliveira
-Descricao: Programa para ajudar a aqueles apressadinhos que ficam dando F5 no site do Jovem Nerd.
+Descricao: Programa para ajudar a aqueles apresadinhos que ficam dando F5 no site do Jovem Nerd.
 		   Este programa:
 		   					- Acessa a página: "http://jovemnerd.com.br/nerdcast/"
 		   					- Extrai o link do ultimo podcast lancado
@@ -12,48 +13,61 @@ Descricao: Programa para ajudar a aqueles apressadinhos que ficam dando F5 no si
 Obs: Por favor não usem o programa para fazer DDOS. Se fizerem isso vcs serao babacas.
 """
 
+linkDownload_UltimoPodcast = ""
+nomeArquivo = ""
+tentativas = 0
+while True:
+	#Abre a pagina do nerdcast e pega o HTML
+	conexao = url.urlopen('http://jovemnerd.com.br/nerdcast/')
 
-#Abre a pagina do nerdcast e pega o HTML
-conexao = url.urlopen('http://jovemnerd.com.br/nerdcast/')
+	#O trabalho agora eh pegar o link para fazer o download do ultimo nerdcast.........
 
-#O trabalho agora eh pegar o link para fazer o download do ultimo nerdcast.........
+	#Pegar todos os links de todos os <div class="podpress-links>". Os links estão 2 linhas abaixo do <div class="podpress-links>"
+	#Os links são armazenados na lista 'links'
+	i=0
+	links = []
+	for linha in conexao:
+		if 'div class="podpress-links"' in linha:
+			i = 2
+		if i>0:
+			if i==1:
+				link = linha.strip() 
+				#print link
+				links.append(link)
+				i = i - 1
+			else:
+				i = i - 1
 
-#Pegar todos os links de todos os <div class="podpress-links>". Os links estão 2 linhas abaixo do <div class="podpress-links>"
-#Os links são armazenados na lista 'links'
-i=0
-links = []
-for linha in conexao:
-	if 'div class="podpress-links"' in linha:
-		i = 2
-	if i>0:
-		if i==1:
-			link = linha.strip() 
-			#print link
-			links.append(link)
-			i = i - 1
-		else:
-			i = i - 1
+	#O ultimo podcast lancado eh o primeiro item da lista
+	ultimoPodcastlancado = links[0]
+	#O link esta entre aspas. Para extrair a substring(link) preciso saber os indices das duas primeiras aspas nessa string
+	indexAspas = []
+	for i in range(len(ultimoPodcastlancado)):
+		if '"' == ultimoPodcastlancado[i]:
+			indexAspas.append(i)
+			if len(indexAspas) == 2:
+				break
 
-#O ultimo podcast lancado eh o primeiro item da lista
-ultimoPodcastlancado = links[0]
+	#Finalmente.... extrair o link para download....
+	indexPrimeiraAspa = indexAspas[0]
+	indexSegundaAspa = indexAspas[1]
 
-#O link esta entre aspas. Para extrair a substring(link) preciso saber os indices das duas primeiras aspas nessa string
-indexAspas = []
-for i in range(len(ultimoPodcastlancado)):
-	if '"' == ultimoPodcastlancado[i]:
-		indexAspas.append(i)
-		if len(indexAspas) == 2:
-			break
+	linkDownload_UltimoPodcast = ultimoPodcastlancado[indexPrimeiraAspa+1 : indexSegundaAspa]
+	nomeArquivo = linkDownload_UltimoPodcast.split('/')[-1]
+	
+	print "Tentativas: %d, Horario: %s" % (tentativas,time.ctime())
+	tentativas += 1
 
-#Finalmente.... extrair o link para download....
-indexPrimeiraAspa = indexAspas[0]
-indexSegundaAspa = indexAspas[1]
-linkDownload_UltimoPodcast = ultimoPodcastlancado[indexPrimeiraAspa+1 : indexSegundaAspa]
+	if nomeArquivo != "nerdcast_497_star_wars_7.mp3":
+		print "Nerdcast de RPG saiu \o/"
+		break
+
+	time.sleep(60)
+
+
+
 print "Link para Download: ",linkDownload_UltimoPodcast
-
 #Fazer o download e salvar o arquivo...
-nomeArquivo = linkDownload_UltimoPodcast.split('/')[-1]
-
 #Abre o arquivo para escrita
 arquivoMP3 = open(nomeArquivo, 'wb')
 
